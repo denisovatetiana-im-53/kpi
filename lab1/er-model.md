@@ -9,7 +9,7 @@ erDiagram
     CATEGORY ||--o{ PRODUCT : contains
     ORDER ||--|{ ORDER_ITEM : contains
     PRODUCT ||--o{ ORDER_ITEM : included_in
-    ORDER ||--|| PAYMENT : has
+    ORDER ||--o{ PAYMENT : has
 
     USER {
         int id PK
@@ -57,6 +57,9 @@ erDiagram
 - `Category 1:N Product` — одна категорія може містити багато товарів.
 - `Order 1:N OrderItem` — одне замовлення містить одну або більше позицій.
 - `Product 1:N OrderItem` — один товар може зустрічатися в багатьох позиціях замовлень.
-- `Order 1:1 Payment` — кожне замовлення має один платіж.
+- `Order 1:N Payment` — одне замовлення може мати нуль або багато платежів, зокрема повторні спроби оплати.
+- Пара order_id і product_id у OrderItem має бути унікальною в межах одного замовлення.
+- quantity має бути цілим числом, більшим за нуль.
+- unit_price має бути невід'ємним і зберігати ціну товару на момент оформлення замовлення.
 
 `OrderItem` є асоціативною сутністю між `Order` та `Product`, оскільки зв'язок має власні атрибути `quantity` та `unit_price`.
