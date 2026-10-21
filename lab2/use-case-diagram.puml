@@ -1,3 +1,4 @@
+
 @startuml
 left to right direction
 skinparam packageStyle rectangle
@@ -11,15 +12,15 @@ User <|-- Buyer
 User <|-- Admin
 
 rectangle "Онлайн-магазин" {
-  usecase "Переглянути каталог" as UC1
-  usecase "Створити замовлення" as UC2
-  usecase "Перевірити дані\nзамовлення" as UC3
-  usecase "Оплатити замовлення" as UC4
-  usecase "Обробити платіж" as UC5
-  usecase "Повторити оплату" as UC6
-  usecase "Керувати товарами" as UC7
-  usecase "Керувати категоріями" as UC8
-  usecase "Переглянути результат\nоплати" as UC9
+  usecase "UC-01\nПереглянути каталог" as UC1
+  usecase "UC-02\nСтворити замовлення" as UC2
+  usecase "UC-03\nПеревірити дані замовлення" as UC3
+  usecase "UC-04\nОплатити замовлення" as UC4
+  usecase "UC-05\nОбробити платіж" as UC5
+  usecase "UC-06\nПовторити оплату" as UC6
+  usecase "UC-07\nКерувати товарами" as UC7
+  usecase "UC-08\nКерувати категоріями" as UC8
+  usecase "UC-09\nПереглянути результат оплати" as UC9
 }
 
 Buyer --> UC1
