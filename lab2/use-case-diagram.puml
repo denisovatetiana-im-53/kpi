@@ -1,4 +1,3 @@
-
 @startuml
 left to right direction
 skinparam packageStyle rectangle
@@ -20,16 +19,18 @@ rectangle "Онлайн-магазин" {
   usecase "Повторити оплату" as UC6
   usecase "Керувати товарами" as UC7
   usecase "Керувати категоріями" as UC8
+  usecase "Переглянути результат\nоплати" as UC9
 }
 
 Buyer --> UC1
 Buyer --> UC2
 Buyer --> UC4
 Buyer --> UC6
+Buyer --> UC9
 
 UC2 ..> UC3 : <<include>>
 UC4 ..> UC5 : <<include>>
-UC6 ..> UC4 : <<extend>> [попередня спроба оплати невдала]
+UC6 ..> UC4 : <<extend>>\n[попередня спроба невдала]
 
 PaymentService --> UC5
 Admin --> UC7
