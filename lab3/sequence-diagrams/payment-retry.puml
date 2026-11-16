@@ -1,0 +1,72 @@
+
+@startuml
+title SC-10 — Повторна спроба оплати
+
+actor Buyer
+participant UI
+participant PaymentController
+participant OrderRepository
+participant OrderItemRepository
+participant PaymentService
+participant PaymentRepository
+
+Buyer -> UI: retryPayment(orderId)
+activate UI
+
+UI -> PaymentController: retryPayment(orderId)
+activate PaymentController
+
+PaymentController -> OrderRepository: findById(orderId)
+activate OrderRepository
+OrderRepository --> PaymentController: return order
+deactivate OrderRepository
+
+PaymentController -> OrderItemRepository: findByOrderId(orderId)
+activate OrderItemRepository
+OrderItemRepository --> PaymentController: return orderItems
+deactivate OrderItemRepository
+
+PaymentController -> PaymentController: calculateTotal(orderItems)
+
+PaymentController -> PaymentRepository: findByOrderId(orderId)
+activate PaymentRepository
+PaymentRepository --> PaymentController: return previousPayment("failed")
+deactivate PaymentRepository
+
+PaymentController -> PaymentService: processPayment(orderId, amount)
+activate PaymentService
+PaymentService --> PaymentController: paymentConfirmed
+deactivate PaymentService
+
+PaymentController -> PaymentRepository: savePayment(orderId, amount, "success")
+activate PaymentRepository
+PaymentRepository --> PaymentController: newPaymentSaved
+deactivate PaymentRepository
+
+note right of PaymentController
+  Previous failed payment
+  remains unchanged
+end note
+
+PaymentController --> UI: paymentSuccessful
+deactivate PaymentController
+
+UI --> Buyer: showPaymentResult("success")
+deactivate UI
+
+opt Buyer requests new payment details
+    Buyer -> UI: viewPaymentResult(orderId)
+    activate UI
+    UI -> PaymentController: getPaymentResult(orderId)
+    activate PaymentController
+    PaymentController -> PaymentRepository: findByOrderId(orderId)
+    activate PaymentRepository
+    PaymentRepository --> PaymentController: paymentDetails
+    deactivate PaymentRepository
+    PaymentController --> UI: return paymentDetails
+    deactivate PaymentController
+    UI --> Buyer: displayPaymentDetails
+    deactivate UI
+end
+
+@enduml
