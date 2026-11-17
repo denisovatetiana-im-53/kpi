@@ -1,0 +1,75 @@
+@startuml
+title SC-11 - Payment service timeout
+
+actor Buyer
+participant UI
+participant PaymentController
+participant OrderRepository
+participant OrderItemRepository
+participant PaymentService
+participant PaymentRepository
+
+Buyer -> UI: initiatePayment(orderId)
+activate UI
+
+UI -> PaymentController: payOrder(orderId)
+activate PaymentController
+
+PaymentController -> OrderRepository: findById(orderId)
+activate OrderRepository
+OrderRepository --> PaymentController: return order
+deactivate OrderRepository
+
+PaymentController -> OrderItemRepository: findByOrderId(orderId)
+activate OrderItemRepository
+OrderItemRepository --> PaymentController: return orderItems
+deactivate OrderItemRepository
+
+PaymentController -> PaymentController: calculateTotal(orderItems)
+
+PaymentController -> PaymentService: processPayment(orderId, amount)
+activate PaymentService
+
+PaymentController -> PaymentController: waitForResponse(timeout)
+PaymentController -> PaymentController: timeoutReached
+
+note over PaymentController, PaymentService
+  PaymentService does not return
+  a response within the configured time.
+end note
+
+deactivate PaymentService
+
+PaymentController -> PaymentRepository: createPendingPayment(orderId, amount)
+activate PaymentRepository
+PaymentRepository --> PaymentController: confirmationPending
+deactivate PaymentRepository
+
+note right of PaymentController
+  Payment result requires clarification.
+  Payment is not marked as "success"
+  or "failed".
+end note
+
+PaymentController --> UI: paymentNotConfirmed
+deactivate PaymentController
+
+UI --> Buyer: showPaymentPendingConfirmation
+deactivate UI
+
+opt Buyer requests payment details
+    Buyer -> UI: viewPaymentResult(orderId)
+    activate UI
+    UI -> PaymentController: getPaymentResult(orderId)
+    activate PaymentController
+    PaymentController -> PaymentRepository: findByOrderId(orderId)
+    activate PaymentRepository
+    PaymentRepository --> PaymentController: pendingPaymentDetails
+    deactivate PaymentRepository
+    PaymentController --> UI: return paymentDetails
+    deactivate PaymentController
+    UI --> Buyer: displayPendingConfirmation
+    deactivate UI
+end
+
+@enduml
