@@ -1,0 +1,66 @@
+@startuml
+title SC-09 - Payment rejection
+
+actor Buyer
+participant UI
+participant PaymentController
+participant OrderRepository
+participant OrderItemRepository
+participant PaymentService
+participant PaymentRepository
+
+Buyer -> UI: initiatePayment(orderId)
+activate UI
+
+UI -> PaymentController: payOrder(orderId)
+activate PaymentController
+
+PaymentController -> OrderRepository: findById(orderId)
+activate OrderRepository
+OrderRepository --> PaymentController: return order
+deactivate OrderRepository
+
+PaymentController -> OrderItemRepository: findByOrderId(orderId)
+activate OrderItemRepository
+OrderItemRepository --> PaymentController: return orderItems
+deactivate OrderItemRepository
+
+PaymentController -> PaymentController: calculateTotal(orderItems)
+
+PaymentController -> PaymentService: processPayment(orderId, amount)
+activate PaymentService
+PaymentService --> PaymentController: paymentRejected
+deactivate PaymentService
+
+PaymentController -> PaymentRepository: createPayment(orderId, amount, "failed")
+activate PaymentRepository
+PaymentRepository --> PaymentController: paymentSaved
+deactivate PaymentRepository
+
+note right of PaymentController
+  Order remains unpaid.
+  Payment status is "failed".
+end note
+
+PaymentController --> UI: paymentFailed
+deactivate PaymentController
+
+UI --> Buyer: showPaymentResult("failed")
+deactivate UI
+
+opt Buyer requests payment details
+    Buyer -> UI: viewPaymentResult(orderId)
+    activate UI
+    UI -> PaymentController: getPaymentResult(orderId)
+    activate PaymentController
+    PaymentController -> PaymentRepository: findByOrderId(orderId)
+    activate PaymentRepository
+    PaymentRepository --> PaymentController: paymentDetails
+    deactivate PaymentRepository
+    PaymentController --> UI: return paymentDetails
+    deactivate PaymentController
+    UI --> Buyer: displayPaymentDetails
+    deactivate UI
+end
+
+@enduml
