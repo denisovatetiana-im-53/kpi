@@ -36,6 +36,11 @@ activate PaymentRepository
 PaymentRepository --> PaymentController: paymentSaved
 deactivate PaymentRepository
 
+PaymentController -> OrderRepository: updateStatus(orderId, "paid")
+activate OrderRepository
+OrderRepository --> PaymentController: statusUpdated
+deactivate OrderRepository
+
 PaymentController --> UI: paymentSuccessful
 deactivate PaymentController
 
